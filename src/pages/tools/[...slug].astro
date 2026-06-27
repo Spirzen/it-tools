@@ -36,7 +36,9 @@ const sidebarItems = sidebar.map((item) => ({...item, active: item.href === page
     {page.description ? <p>{page.description}</p> : null}
   </header>
 
-  <article class="article-body" set:html={page.bodyHtml} />
+  <article class="article-shell">
+    <div class="article-body" set:html={page.bodyHtml} />
+  </article>
 
   {
     page.relatedLinks.length > 0 ? (
@@ -64,5 +66,7 @@ const sidebarItems = sidebar.map((item) => ({...item, active: item.href === page
 
   <script type="module">
     import '@/lib/embed/play-embed.js';
+    import '@/lib/embed/code-embed.js';
+    import '@/lib/mermaid-init.js';
   </script>
 </PortalLayout>

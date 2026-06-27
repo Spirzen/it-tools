@@ -1,6 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
+import {
+  fixCrossPortalLinks,
+  fixImageUrls,
+  stripJsxComments,
+} from '../markdown/shared.mjs';
 
 export {
   parseToolsMarkdownFile,
@@ -12,7 +17,6 @@ export {
 
 const SPIRZEN_BASE = 'https://spirzen.ru';
 const TERMS_BASE = 'https://terms.spirzen.ru';
-const HTML_EDITOR_BASE = 'https://html.spirzen.ru';
 
 function listMarkdownFilesRecursive(dir, baseDir = dir) {
   if (!fs.existsSync(dir)) {
@@ -96,22 +100,25 @@ function parseToolsMarkdownFile(filePath, contentRoot) {
     description: data.description ?? '',
     sidebarLabel: data.sidebar_label ?? data.title ?? pathSegments.at(-1) ?? '',
     related: Array.isArray(data.related) ? data.related : [],
-    bodyMarkdown: prepareToolsBody(content),
+    bodyMarkdown: prepareToolsBody(content, relPath),
     categoryKey,
     categoryLabel,
     isIntro: pathSegments.at(-1) === 'intro' || slug === '/tools/intro',
   };
 }
 
-function prepareToolsBody(content) {
+function prepareToolsBody(content, relPath) {
   let body = content;
   body = body.replace(/import\s+[\s\S]*?from\s+['"]@theme\/[^'"]+['"];?\s*/g, '');
   body = body.replace(/import\s+[\s\S]*?from\s+['"]@site\/[^'"]+['"];?\s*/g, '');
+  body = stripJsxComments(body);
   body = transformPlayEmbeds(body);
+  body = transformCodeEmbeds(body);
   body = body.replace(/<RandomGameGenerator\s*\/>/g, transformRandomGameGenerator());
   body = body.replace(/<DocCardList\s*\/>/g, '<!-- DOC_CARD_LIST -->');
   body = stripRemainingJsx(body);
   body = stripArticleTags(body);
+  body = fixImageUrls(body, relPath, '/doc-assets/tools');
   body = fixCrossPortalLinks(body);
   return body.trim();
 }
@@ -125,12 +132,27 @@ function transformRandomGameGenerator() {
   ].join(' ');
 }
 
+function transformCodeEmbeds(content) {
+  return content.replace(/<ExternalCodeEmbed\s+([\s\S]*?)\/>/g, (_, attrs) => {
+    const example = readAttr(attrs, 'example');
+    const title = readAttr(attrs, 'title');
+    const minHeight = readAttr(attrs, 'minHeight', {jsx: true}) || '280';
+    return [
+      `<div class="itu-code-embed"`,
+      `data-example="${escapeAttr(example)}"`,
+      `data-title="${escapeAttr(title)}"`,
+      `data-min-height="${escapeAttr(minHeight)}">`,
+      `</div>`,
+    ].join(' ');
+  });
+}
+
 function transformPlayEmbeds(content) {
   return content.replace(/<ExternalPlayEmbed\s+([\s\S]*?)\/>/g, (_, attrs) => {
     const example = readAttr(attrs, 'example');
     const src = readAttr(attrs, 'src');
     const title = readAttr(attrs, 'title');
-    const minHeight = readAttr(attrs, 'minHeight', {jsx: true}) ?? '320';
+    const minHeight = readAttr(attrs, 'minHeight', {jsx: true}) || '320';
     const playProps = readPlayProps(attrs);
     const propsJson = escapeAttr(JSON.stringify(playProps));
     return [
@@ -196,18 +218,6 @@ function stripArticleTags(content) {
     kept.push(line);
   }
   return kept.join('\n');
-}
-
-function fixCrossPortalLinks(content) {
-  let body = content;
-  body = body.replace(/\]\(\/encyclopedia\//g, `](${SPIRZEN_BASE}/encyclopedia/`);
-  body = body.replace(/\]\(\/glossary\//g, `](${TERMS_BASE}/glossary/`);
-  body = body.replace(/\]\(\.\.\/\.\.\/encyclopedia\//g, `](${SPIRZEN_BASE}/encyclopedia/`);
-  body = body.replace(/\]\(\.\.\/encyclopedia\//g, `](${SPIRZEN_BASE}/encyclopedia/`);
-  body = body.replace(/\]\(\.\.\/glossary\//g, `](${TERMS_BASE}/glossary/`);
-  body = body.replace(/\]\(\.\.\/\.\.\/glossary\//g, `](${TERMS_BASE}/glossary/`);
-  body = body.replace(/\]\(https:\/\/spirzen\.github\.io\/WebEditor\/?\)/g, `](${HTML_EDITOR_BASE})`);
-  return body;
 }
 
 function escapeAttr(value) {
