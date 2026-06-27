@@ -1,17 +1,3 @@
 ---
-import PortalLayout from '@/components/PortalLayout.astro';
-import {getPortalContext} from '@/lib/portal.mjs';
-const {navItems, brandHref, brandLabel, ecosystemConfigJson} = getPortalContext();
+return Astro.redirect('/tools/intro');
 ---
-
-<PortalLayout
-  title="Инструменты — IT Universe"
-  description="tools.spirzen.ru"
-  brandLabel={brandLabel}
-  brandHref={brandHref}
-  navItems={navItems}
-  ecosystemConfigJson={ecosystemConfigJson}
->
-  <div class="portal-hero"><h1>Инструменты</h1><p>Каталог софта и онлайн-утилит.</p></div>
-  <div class="placeholder-card"><h2>В разработке</h2></div>
-</PortalLayout>
