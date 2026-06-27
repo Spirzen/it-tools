@@ -5,6 +5,7 @@ import {
   fixCrossPortalLinks,
   fixImageUrls,
   stripJsxComments,
+  preprocessMarkdownInHtmlBlocks,
 } from '../markdown/shared.mjs';
 
 export {
@@ -118,8 +119,9 @@ function prepareToolsBody(content, relPath) {
   body = body.replace(/<DocCardList\s*\/>/g, '<!-- DOC_CARD_LIST -->');
   body = stripRemainingJsx(body);
   body = stripArticleTags(body);
-  body = fixImageUrls(body, relPath, '/doc-assets/tools');
   body = fixCrossPortalLinks(body);
+  body = preprocessMarkdownInHtmlBlocks(body);
+  body = fixImageUrls(body, relPath, '/doc-assets/tools');
   return body.trim();
 }
 
