@@ -1,0 +1,17 @@
+{
+  "name": "it-tools",
+  "version": "0.1.0",
+  "type": "module",
+  "homepage": "https://tools.spirzen.ru",
+  "scripts": {
+    "dev": "astro dev --port 4334",
+    "build": "astro build",
+    "preview": "astro preview --port 4334"
+  },
+  "dependencies": {
+    "astro": "^5.10.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
