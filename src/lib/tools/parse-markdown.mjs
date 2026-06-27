@@ -118,7 +118,6 @@ function prepareToolsBody(content, relPath) {
   body = body.replace(/<RandomGameGenerator\s*\/>/g, transformRandomGameGenerator());
   body = body.replace(/<DocCardList\s*\/>/g, '<!-- DOC_CARD_LIST -->');
   body = stripRemainingJsx(body);
-  body = stripArticleTags(body);
   body = fixCrossPortalLinks(body);
   body = preprocessMarkdownInHtmlBlocks(body);
   body = fixImageUrls(body, relPath, '/doc-assets/tools');

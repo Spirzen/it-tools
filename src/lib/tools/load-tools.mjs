@@ -8,7 +8,7 @@ import {
   pathSegmentsToHref,
 } from './parse-markdown.mjs';
 import {renderMarkdownToHtml} from './render-markdown.mjs';
-import {buildPortalCardListHtml} from '../markdown/shared.mjs';
+import {buildPortalCardListHtml, extractTocFromMarkdown} from '../markdown/shared.mjs';
 
 const SPIRZEN_BASE = 'https://spirzen.ru';
 const TERMS_BASE = 'https://terms.spirzen.ru';
@@ -39,12 +39,32 @@ async function buildToolsPage(page, byHref) {
     markdown = markdown.replace('<!-- DOC_CARD_LIST -->', buildDocCardListHtml(page, byHref));
   }
 
+  const toc = extractTocFromMarkdown(markdown);
+
   return {
     ...page,
     pathSlug: page.pathSegments.join('/'),
     bodyHtml: await renderMarkdownToHtml(markdown),
     relatedLinks: buildRelatedLinks(page.related),
+    breadcrumbs: buildBreadcrumbs(page),
+    toc,
   };
+}
+
+function buildBreadcrumbs(page) {
+  const crumbs = [{label: 'Инструменты', href: '/tools/intro'}];
+  if (page.categoryKey && page.href !== '/tools/intro') {
+    crumbs.push({
+      label: page.categoryLabel ?? page.categoryKey,
+      href: `/tools/${page.categoryKey}/intro`,
+    });
+  }
+  if (!page.isIntro || page.pathSegments.length > 1) {
+    crumbs.push({label: page.title, href: page.href, current: true});
+  } else if (page.href === '/tools/intro') {
+    crumbs[0].current = true;
+  }
+  return crumbs;
 }
 
 function buildDocCardListHtml(page, byHref) {
@@ -121,7 +141,7 @@ function buildSidebar(pages) {
   const items = [];
   const rootIntro = pages.find((p) => p.href === '/tools/intro');
   if (rootIntro) {
-    items.push({slug: 'intro', label: 'О разделе', href: '/tools/intro'});
+    items.push({type: 'link', slug: 'intro', label: 'О разделе', href: '/tools/intro'});
   }
 
   const categories = new Map();
@@ -139,19 +159,23 @@ function buildSidebar(pages) {
     a[1].label.localeCompare(b[1].label, 'ru'),
   )) {
     const intro = categoryPages.find((p) => p.isIntro);
-    if (intro) {
-      items.push({
-        slug: intro.pathSlug,
-        label,
-        href: intro.href,
-      });
-    } else {
-      items.push({
-        slug: key,
-        label,
-        href: `/tools/${key}/intro`,
-      });
-    }
+    const children = categoryPages
+      .filter((p) => !p.isIntro)
+      .sort((a, b) => a.title.localeCompare(b.title, 'ru'))
+      .map((p) => ({
+        slug: p.pathSlug,
+        label: p.title,
+        href: p.href,
+      }));
+
+    items.push({
+      type: 'category',
+      slug: intro?.pathSlug ?? key,
+      categoryKey: key,
+      label,
+      href: intro?.href ?? `/tools/${key}/intro`,
+      children,
+    });
   }
 
   return items;
