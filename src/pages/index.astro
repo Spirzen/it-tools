@@ -1,3 +1,9 @@
 ---
-return Astro.redirect('/tools/intro');
+import RedirectLayout from '@/components/RedirectLayout.astro';
 ---
+
+<RedirectLayout
+  to="/tools/intro"
+  title="Инструменты IT"
+  label="Переход в инструменты…"
+/>
