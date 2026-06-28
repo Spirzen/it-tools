@@ -1,23 +1,24 @@
 {
-  "name": "it-tools",
-  "version": "0.1.0",
-  "type": "module",
-  "homepage": "https://tools.spirzen.ru",
-  "scripts": {
-    "dev": "astro dev --port 4334",
-    "build": "astro build",
-    "preview": "astro preview --port 4334",
-    "sync:tools": "node scripts/sync-tools.mjs"
-  },
-  "dependencies": {
-    "astro": "^5.10.0",
-    "gray-matter": "^4.0.3",
-    "remark": "^15.0.1",
-    "remark-gfm": "^4.0.1",
-    "remark-html": "^16.0.1",
-    "mermaid": "^11.6.0"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  }
+    "name":  "it-tools",
+    "version":  "0.1.0",
+    "type":  "module",
+    "homepage":  "https://tools.spirzen.ru",
+    "scripts":  {
+                    "dev":  "astro dev --port 4334",
+                    "build":  "astro build",
+                    "preview":  "astro preview --port 4334",
+                    "sync:tools":  "node scripts/sync-tools.mjs"
+                },
+    "dependencies":  {
+                         "astro":  "^5.10.0",
+                         "gray-matter":  "^4.0.3",
+                         "remark":  "^15.0.1",
+                         "remark-gfm":  "^4.0.1",
+                         "remark-html":  "^16.0.1",
+                         "mermaid":  "^11.6.0",
+                         "@astrojs/sitemap":  "^3.4.1"
+                     },
+    "engines":  {
+                    "node":  "\u003e=20.0.0"
+                }
 }

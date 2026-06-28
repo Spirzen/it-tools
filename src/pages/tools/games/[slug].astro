@@ -1,0 +1,15 @@
+---
+import RedirectLayout from '../../../components/RedirectLayout.astro';
+
+export function getStaticPaths() {
+  const base = 'https://games.spirzen.ru/games/9-031-gametools';
+  return ['intro', '1', '2', '3', '4', '1111'].map((id) => ({
+    params: {slug: id},
+    props: {to: `${base}/${id}`},
+  }));
+}
+
+const {to} = Astro.props;
+---
+
+<RedirectLayout to={to} title="Переход на games.spirzen.ru" label="Раздел «Игры» переехал на игровой портал…" />
